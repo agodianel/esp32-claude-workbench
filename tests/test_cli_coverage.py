@@ -15,7 +15,7 @@ def test_analyze_sdkconfig_main(tmp_path: Path, capsys: pytest.CaptureFixture):
     """Test analyze-sdkconfig CLI logic."""
     # Create mock sdkconfig
     sdkconfig_file = tmp_path / "sdkconfig"
-    sdkconfig_file.write_text("CONFIG_IDF_TARGET=\"esp32\"\nCONFIG_ESP_TASK_WDT_TIMEOUT_S=1\n")
+    sdkconfig_file.write_text('CONFIG_IDF_TARGET="esp32"\nCONFIG_ESP_TASK_WDT_TIMEOUT_S=1\n')
 
     # Mock sys.argv
     with patch.object(sys, "argv", ["analyze-sdkconfig", str(sdkconfig_file)]):
@@ -46,7 +46,7 @@ def test_check_task_stacks_main(tmp_path: Path, capsys: pytest.CaptureFixture):
     main_dir = tmp_path / "main"
     main_dir.mkdir()
     source_file = main_dir / "test.c"
-    source_file.write_text("void init() { xTaskCreate(mytask, \"wifi\", 512, NULL, 5, NULL); }")
+    source_file.write_text('void init() { xTaskCreate(mytask, "wifi", 512, NULL, 5, NULL); }')
 
     with patch.object(sys, "argv", ["check-stacks", str(main_dir)]):
         with pytest.raises(SystemExit) as exc:
