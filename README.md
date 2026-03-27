@@ -159,6 +159,15 @@ esp32-claude-workbench/
 │   ├── esp32_crash_review/      #   Analyze crash dumps
 │   └── pr_prepare/              #   Prepare pull requests
 ├── boards/                      # Board-specific pinouts and limitations
+├── docs_sources.yaml            # Documentation sources for FAISS RAG index
+├── mcp/                         # FastMCP Server Backend
+│   ├── mcp_server.py            #   Main server entrypoint
+│   ├── requirements.txt         #   ML/RAG python dependencies
+│   └── tools/                   #   MCP Python Tools
+│       ├── mission_generator.py #     Create standardized mission files
+│       ├── pin_audit.py         #     Audit GPIO conflicts and rules
+│       ├── sdkconfig_check.py   #     Verify production readiness
+│       └── search_docs.py       #     Query the local FAISS index
 ├── missions/
 │   ├── templates/               # Mission & contract templates
 │   └── examples/                # Worked example missions
@@ -173,19 +182,21 @@ esp32-claude-workbench/
 │   ├── ota_update.md            #   OTA update issues
 │   ├── watchdog_reset.md        #   Watchdog timer issues
 │   └── memory_review.md         #   Memory leak & corruption
+├── scripts/
+│   └── index_esp_docs.py        # Crawler and FAISS RAG vector indexer
 ├── templates/
 │   ├── esp-idf-basic/           # Minimal ESP-IDF starter
 │   ├── wifi-station/            # Wi-Fi station with reconnect
 │   └── mqtt-node/               # MQTT telemetry with LWT
-├── tools/                       # Python automation
+├── tools/                       # Python CLI automation
 │   ├── validate_mission.py      #   Mission file validator
 │   ├── generate_contract.py     #   Contract generator
 │   ├── summarize_logs.py        #   Log analyzer
 │   ├── scan_pins.py             #   GPIO pin scanner & conflict detector
 │   ├── analyze_sdkconfig.py     #   sdkconfig misconfiguration checker
 │   └── check_task_stacks.py     #   FreeRTOS task stack analyzer
-├── tests/                       # 132 pytest tests
-└── .github/workflows/           # CI pipelines
+├── tests/                       # 148+ pytest unit and integration tests
+└── .github/workflows/           # GitHub Actions CI pipelines
 ```
 
 ---
