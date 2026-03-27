@@ -1,31 +1,29 @@
-import sys
-import os
-
-# Ensure the root project directory is in sys.path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from mcp.server.fastmcp import FastMCP
-from mcp.tools.pin_audit import run_pin_audit
-from mcp.tools.sdkconfig_check import run_sdkconfig_check
-from mcp.tools.mission_generator import generate_mission
-from mcp.tools.search_docs import search_esp_docs as _search_esp_docs
+from tools.mission_generator import generate_mission
+from tools.pin_audit import run_pin_audit
+from tools.sdkconfig_check import run_sdkconfig_check
+from tools.search_docs import search_esp_docs as _search_esp_docs
 
 mcp = FastMCP("esp32-workbench")
+
 
 @mcp.tool()
 def pin_audit(file_path: str) -> str:
     """Scan a C/H file for ESP32 GPIO conflicts, input-only misuse, and bootstrap pin risks."""
     return run_pin_audit(file_path)
 
+
 @mcp.tool()
 def sdkconfig_review(sdkconfig_path: str) -> str:
     """Check sdkconfig for production readiness. Run this before any release."""
     return run_sdkconfig_check(sdkconfig_path)
 
+
 @mcp.tool()
 def create_mission(feature_name: str, board: str, description: str) -> str:
     """Create a structured mission markdown file for a new firmware task."""
     return generate_mission(feature_name, board, description)
+
 
 @mcp.tool()
 def search_esp_docs(query: str, top_k: int = 5) -> str:
@@ -34,8 +32,9 @@ def search_esp_docs(query: str, top_k: int = 5) -> str:
         top_k = int(top_k)
     except (ValueError, TypeError):
         top_k = 5
-        
+
     return _search_esp_docs(query, top_k)
+
 
 if __name__ == "__main__":
     mcp.run()
