@@ -469,6 +469,17 @@ Built with the assistance of [Claude](https://github.com/claude) by Anthropic.
 
 ---
 
+## Star History
+
+<a href="https://www.star-history.com/?repos=agodianel%2Fesp32-claude-workbench&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/image?repos=agodianel/esp32-claude-workbench&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/image?repos=agodianel/esp32-claude-workbench&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/image?repos=agodianel/esp32-claude-workbench&type=date&legend=top-left" />
+ </picture>
+</a>
+---
+
 ## 📄 License
 
 MIT — see [LICENSE](LICENSE).
