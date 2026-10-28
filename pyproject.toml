@@ -87,6 +87,11 @@ line-length = 100
 select = ["E", "F", "W", "I", "N", "UP", "B"]
 ignore = ["E501", "N802"]
 
+[tool.ruff.lint.isort]
+# A stray local mcp/ folder (v0.1 leftovers) would otherwise make ruff treat the MCP SDK
+# as first-party and sort imports differently than CI.
+known-third-party = ["mcp"]
+
 [tool.coverage.run]
 source = ["esp32_workbench"]
 omit = ["tests/*", "*/docs_semantic.py"]

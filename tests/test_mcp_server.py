@@ -119,9 +119,8 @@ def test_every_tool_has_description():
 def test_official_mcp_client_interop():
     """Drive the server with the official MCP Python SDK client over real stdio."""
     pytest.importorskip("mcp.client.stdio")
-    from mcp.client.stdio import stdio_client
-
     from mcp import ClientSession, StdioServerParameters
+    from mcp.client.stdio import stdio_client
 
     def field(obj, snake, camel):
         """SDK releases differ between camelCase and snake_case attribute names."""
