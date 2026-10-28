@@ -1,0 +1,108 @@
+{
+  "target": "esp32c3",
+  "name": "ESP32-C3",
+  "arch": "riscv",
+  "toolchain_prefix": "riscv32-esp-elf",
+  "gpios": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21
+  ],
+  "input_only": [],
+  "no_internal_pull": [],
+  "strapping": {
+    "2": "Chip boot mode strapping pin (with GPIO8, GPIO9). Datasheet v2.4 Table 3-3: GPIO2 does not actually determine SPI Boot vs Joint Download Boot, but it is recommended to pull it up (value 1 in both modes) due to glitches. Default at reset: floating.",
+    "8": "Chip boot mode (Joint Download Boot requires GPIO8=1 with GPIO9=0; any value for SPI Boot) and UART0 ROM message printing control together with EFUSE_UART_PRINT_CONTROL. Default at reset: floating.",
+    "9": "Chip boot mode select: 1 = SPI Boot (default, internal weak pull-up), 0 = Joint Download Boot (UART0 / USB-Serial-JTAG download). Holding GPIO9 low at reset enters download mode."
+  },
+  "flash_spi": [
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+  ],
+  "psram": {
+    "pins": [],
+    "condition": "Not applicable: neither the ESP-IDF GPIO summary nor the ESP32-C3 datasheet v2.4 describes a PSRAM interface for this chip."
+  },
+  "usb_jtag": {
+    "pins": [
+      18,
+      19
+    ],
+    "note": "GPIO18 = USB_D-, GPIO19 = USB_D+. Used by USB-Serial-JTAG by default; reconfiguring them as normal GPIOs disables USB-JTAG. If the app reconfigures these pins the device disappears from the host; recover by pulling GPIO9 low and resetting. When USB is disabled their internal weak pull-up/down are disabled by default (configurable). D-/D+ can be swapped via USB_SERIAL_JTAG_EXCHG_PINS."
+  },
+  "jtag": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "uart0_default": {
+    "tx": 21,
+    "rx": 20
+  },
+  "adc1": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4
+  },
+  "adc2": {
+    "5": 0
+  },
+  "adc2_wifi_conflict": null,
+  "has_wifi": true,
+  "has_bt_classic": false,
+  "has_ble": true,
+  "notes": [
+    "flash_spi: GPIO12-GPIO17 are the SPI0/1 flash pins per ESP-IDF ('usually used for SPI flash and are not recommended for other uses'; datasheet: SPIHD=GPIO12, SPIWP=GPIO13, SPICS0=GPIO14, SPICLK=GPIO15, SPID=GPIO16, SPIQ=GPIO17). GPIO11 is included because the datasheet IO MUX table maps chip pin 18 (VDD_SPI) to GPIO11 and states VDD_SPI is 'the power supply pin for flash by default, and can only be used as a GPIO pin if the flash is powered by an external power supply'. ESP-IDF's GPIO summary does NOT flag GPIO11 - treat it as an error only if the board powers flash from VDD_SPI.",
+    "Datasheet v2.4 says the chip has '22 or 16 GPIO pins' - in-package-flash variants expose fewer GPIOs (the flash pins are used internally). Do not use pins connected to in-package flash for any other purpose.",
+    "input_only / no_internal_pull are empty: datasheet v2.4 Sec. 4.1.3.1 states 'All GPIOs have selectable internal pull-up or pull-down' and 'All digital IO pins are bi-directional'; TRM v1.4 Register 5.21 IO_MUX_GPIOn_REG (n: 0-21) has FUN_WPU/FUN_WPD for every GPIO.",
+    "jtag order is [MTMS, MTDI, MTCK, MTDO] = [GPIO4, GPIO5, GPIO6, GPIO7] (ESP-IDF configure-other-jtag page and datasheet IO MUX table). By default JTAG is routed to the built-in USB_SERIAL_JTAG; burning DIS_USB_JTAG eFuse moves it to GPIO4-GPIO7.",
+    "ADC2: ESP-IDF stable (v6.1) ADC oneshot page: 'ADC2 oneshot mode is no longer supported, due to hardware limitations. The results are not stable. This issue can be found in ESP32-C3 Series SoC Errata. For compatibility, you can enable CONFIG_ADC_ONESHOT_FORCE_USE_ADC2_ON_C3 to force use ADC2.' The ADC continuous page likewise says ADC2 DMA is no longer supported (CONFIG_ADC_CONTINUOUS_FORCE_USE_ADC2_ON_C3_S3). Datasheet: 'ADC2 of some chip revisions is not operable' and ADC2 is not factory-calibrated. Errata ADC-183 ('The Digital Controller (DMA) of SAR ADC2 Cannot Work') affects revisions v0.0-v1.1, workaround 'use SAR ADC1', no fix scheduled. Recommend flagging any ADC2 (GPIO5) use.",
+    "adc2_wifi_conflict is null: the current ESP-IDF stable C3 ADC oneshot/continuous pages contain no ADC2-vs-Wi-Fi restriction text; the documented restriction is the ADC2 hardware limitation above. Older IDF releases may have had different wording - not checked.",
+    "ADC hardware limitation (all ADC): RNG uses ADC as an entropy source, so random numbers are less random while adc_oneshot_read() runs; a given ADC unit can only be in oneshot OR continuous mode at a time.",
+    "Strapping timing: hold time tH min 3 ms after CHIP_EN high before strapping pins become regular IO.",
+    "RTC/deep-sleep wake: only GPIO0-GPIO5 can wake the chip from Deep-sleep; others only from Light-sleep. GPIO0/GPIO1 are also XTAL_32K_P/N.",
+    "Radio: datasheet title '2.4 GHz Wi-Fi (802.11b/g/n) and Bluetooth 5 (LE)' - no Bluetooth Classic.",
+    "Data sourced from ESP-IDF stable = v6.1 docs, ESP32-C3 datasheet v2.4, ESP32-C3 TRM v1.4, retrieved 2026-10-28."
+  ],
+  "sources": [
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32c3/api-reference/peripherals/gpio.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32c3/api-reference/peripherals/adc/adc_oneshot.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32c3/api-reference/peripherals/adc/adc_continuous.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32c3/api-guides/jtag-debugging/configure-other-jtag.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32c3/api-guides/usb-serial-jtag-console.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32c3/api-guides/tools/idf-monitor.html",
+    "https://www.espressif.com/sites/default/files/documentation/esp32-c3_datasheet_en.pdf",
+    "https://www.espressif.com/sites/default/files/documentation/esp32-c3_technical_reference_manual_en.pdf",
+    "https://docs.espressif.com/projects/esp-chip-errata/en/latest/esp32c3/02-errata-summary/index.html",
+    "https://docs.espressif.com/projects/esp-chip-errata/en/latest/esp32c3/03-errata-description/shared/sar-adc-adc2-not-work.html"
+  ],
+  "conditional": {
+    "11": "VDD_SPI flash power pin — only usable as GPIO when the flash is powered externally (eFuse VDD_SPI_AS_GPIO); datasheet"
+  }
+}

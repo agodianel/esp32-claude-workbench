@@ -2,7 +2,7 @@
 
 import textwrap
 
-from tools.summarize_logs import format_summary, parse_log_line, summarize_logs
+from esp32_workbench.logs import format_summary, parse_log_line, summarize_logs
 
 
 class TestParseLogLine:

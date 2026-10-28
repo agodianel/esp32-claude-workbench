@@ -1,0 +1,150 @@
+{
+  "target": "esp32s3",
+  "name": "ESP32-S3",
+  "arch": "xtensa",
+  "toolchain_prefix": "xtensa-esp32s3-elf",
+  "gpios": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46,
+    47,
+    48
+  ],
+  "input_only": [],
+  "no_internal_pull": [],
+  "strapping": {
+    "0": "Chip boot mode (with GPIO46). Default weak pull-up (1). GPIO0=1 -> SPI boot; GPIO0=0 and GPIO46=0 -> Joint Download Boot (USB-Serial-JTAG / USB-OTG / UART download).",
+    "3": "JTAG signal source selection, only evaluated when EFUSE_STRAP_JTAG_SEL=1 (and EFUSE_DIS_PAD_JTAG=0, EFUSE_DIS_USB_JTAG=0): GPIO3=1 -> USB Serial/JTAG controller, GPIO3=0 -> pad JTAG (MTDI/MTCK/MTMS/MTDO). Default: floating (no internal pull at reset); datasheet says the strapping value must be driven by an external circuit that is not high-impedance. Ignored with default eFuses.",
+    "45": "VDD_SPI (flash/PSRAM supply) voltage. Default weak pull-down (0) -> 3.3 V from VDD3P3_RTC via RSPI; 1 -> 1.8 V Flash Voltage Regulator. Ignored if eFuse EFUSE_VDD_SPI_FORCE=1 (then EFUSE_VDD_SPI_TIEH decides).",
+    "46": "Chip boot mode (must be 0 with GPIO0=0 for download boot) and ROM message printing (with EFUSE_UART_PRINT_CONTROL and EFUSE_DIS_USB_SERIAL_JTAG_ROM_PRINT). Default weak pull-down (0)."
+  },
+  "flash_spi": [
+    27,
+    28,
+    29,
+    30,
+    31,
+    32
+  ],
+  "psram": {
+    "pins": [
+      26,
+      33,
+      34,
+      35,
+      36,
+      37
+    ],
+    "condition": "GPIO26 = SPICS1 = PSRAM CE# on any chip/module with in-package or off-package PSRAM (Quad: ESP32-S3RH2, S3FH4R2, EOL S3R2). GPIO33-37 (SPIIO4-7 + SPIDQS) are additionally used only with Octal flash and/or Octal PSRAM, e.g. ESP32-S3R8 / ESP32-S3R8V / ESP32-S3R16V (module suffixes R8/R16V etc.). PSRAM also shares GPIO27,28,30,31,32 with flash."
+  },
+  "usb_jtag": {
+    "pins": [
+      19,
+      20
+    ],
+    "note": "GPIO19 = USB_D-, GPIO20 = USB_D+. Shared by the USB Serial/JTAG controller (default) and USB OTG on the internal PHY. ESP-IDF: 'GPIO19 and GPIO20 are used by USB-JTAG by default. If they are reconfigured to operate as normal GPIOs, USB-JTAG functionality will be disabled.' Datasheet: GPIO19/20 show high-level glitches (~60 us each) during power-up."
+  },
+  "jtag": [
+    39,
+    40,
+    41,
+    42
+  ],
+  "uart0_default": {
+    "tx": 43,
+    "rx": 44
+  },
+  "adc1": {
+    "1": 0,
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 4,
+    "6": 5,
+    "7": 6,
+    "8": 7,
+    "9": 8,
+    "10": 9
+  },
+  "adc2": {
+    "11": 0,
+    "12": 1,
+    "13": 2,
+    "14": 3,
+    "15": 4,
+    "16": 5,
+    "17": 6,
+    "18": 7,
+    "19": 8,
+    "20": 9
+  },
+  "adc2_wifi_conflict": "ADC2 is also used by Wi-Fi. adc_oneshot_read() has provided protection between the Wi-Fi driver and ADC oneshot mode driver. [ADC oneshot page]",
+  "has_wifi": true,
+  "has_bt_classic": false,
+  "has_ble": true,
+  "notes": [
+    "JTAG mapping (datasheet IO MUX table): MTCK=GPIO39, MTDO=GPIO40, MTDI=GPIO41, MTMS=GPIO42. Datasheet: to free these pins the USB Serial/JTAG (GPIO19/20) can be used for JTAG instead.",
+    "Flash pin mapping (datasheet Table 2-14 + IO MUX): GPIO26=SPICS1 (PSRAM CE#), GPIO27=SPIHD, GPIO28=SPIWP, GPIO29=SPICS0 (flash CS#), GPIO30=SPICLK, GPIO31=SPIQ, GPIO32=SPID. flash_spi lists 27-32; ESP-IDF GPIO page and datasheet (Priority 4) treat all of GPIO26-32 as SPI0/1, not recommended for other uses.",
+    "Octal flash also uses GPIO33-37 (ESP-IDF: 'When using Octal flash or Octal PSRAM or both, GPIO33 ~ GPIO37 are connected to SPIIO4 ~ SPIIO7 and SPIDQS'). flash_spi does not include them because it depends on the flash type; an audit must add GPIO33-37 when octal flash or octal PSRAM is configured (e.g. CONFIG_SPIRAM_MODE_OCT or octal flash).",
+    "ESP32-S3 has NO input-only GPIOs: every pin in the datasheet IO MUX table is I/O/T, and the ESP-IDF GPIO page lists no GPI pins. GPIO37/38 in particular are normal bidirectional IOs (unlike ESP32 where GPIO34-39 are input-only).",
+    "GPIO47/48 are SPICLK_P_DIFF/SPICLK_N_DIFF. Datasheet note: on ESP32-S3R8V and ESP32-S3R16V (VDD_SPI = 1.8 V) GPIO47 and GPIO48 operate at 1.8 V, unlike other GPIOs.",
+    "GPIO33-37 (and SPICLK_N/P = GPIO48/47) are powered by VDD_SPI or VDD3P3_CPU depending on EFUSE_PIN_POWER_SELECTION; on 1.8 V VDD_SPI parts this affects IO voltage (datasheet Table 2-1 notes 3/4).",
+    "GPIO3 strapping: datasheet states 'This pin does not have any internal pull resistors and the strapping value must be controlled by the external circuit that cannot be in a high impedance state.' This refers to its reset/strapping state (IE only, no WPU/WPD); GPIO3 is not listed as lacking software-configurable pulls, so it is not in no_internal_pull.",
+    "When USB function is disabled on GPIO19/20, their weak pull-up/pull-down are disabled by default but configurable (datasheet Table 2-1 note 6).",
+    "ESP32-S3 has no GPIO22-25.",
+    "ADC continuous (DMA) mode: 'ADC2 DMA functionality is no longer supported to retrieve ADC conversion results due to hardware limitations, as unstable results have been observed.' (adc_continuous page; can be forced with CONFIG_ADC_CONTINUOUS_FORCE_USE_ADC2_ON_C3_S3).",
+    "The ESP-IDF S3 GPIO page does not contain the ESP32-style sentence 'ADC2 pins cannot be used when Wi-Fi is used'; it only appears as the ADC oneshot 'ADC2 is also used by Wi-Fi' limitation recorded in adc2_wifi_conflict.",
+    "Strapping hold time tH min 3 ms after CHIP_PU goes high (datasheet Table 3-2).",
+    "toolchain_prefix confirmed from ESP-IDF docs: xtensa-esp32s3-elf-gdb and xtensa-esp32s3-elf-addr2line. Installer package is xtensa-esp-elf."
+  ],
+  "sources": [
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-reference/peripherals/gpio.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-reference/peripherals/adc/adc_oneshot.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-reference/peripherals/adc/adc_continuous.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-guides/jtag-debugging/using-debugger.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-guides/fatal-errors.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-guides/tools/idf-monitor.html",
+    "https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf (v2.2: Table 1-1, Table 2-1 Pin Overview + notes, Table 2-2, IO MUX table, Sections 2.3.4/2.3.5, Table 2-14, Section 3 Boot Configurations incl. 3.4 JTAG Signal Source Control)",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-guides/tools/idf-tools.html"
+  ]
+}

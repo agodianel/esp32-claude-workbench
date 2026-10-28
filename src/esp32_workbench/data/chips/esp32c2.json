@@ -1,0 +1,97 @@
+{
+  "target": "esp32c2",
+  "name": "ESP32-C2",
+  "arch": "riscv",
+  "toolchain_prefix": "riscv32-esp-elf",
+  "gpios": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20
+  ],
+  "input_only": [],
+  "no_internal_pull": [],
+  "strapping": {
+    "8": "Chip boot mode (with GPIO9) and UART0 ROM message printing (with EFUSE_UART_PRINT_CONTROL). No default pull at reset (datasheet: 'N/A'). For Joint Download Boot GPIO8 must be 1 while GPIO9=0; GPIO8 is don't-care for SPI boot. Must therefore be externally defined if download mode is needed.",
+    "9": "Chip boot mode. Default internal weak pull-up (1). GPIO9=1 -> SPI boot; GPIO9=0 (with GPIO8=1) -> Joint Download Boot (UART download)."
+  },
+  "flash_spi": [
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+  ],
+  "psram": {
+    "pins": [],
+    "condition": "Not applicable: no PSRAM in the ESP8684 series comparison table and the ESP-IDF GPIO page mentions only SPI flash for SPI0/1."
+  },
+  "usb_jtag": {
+    "pins": [],
+    "note": "ESP32-C2 / ESP8684 has no USB peripheral (no USB-Serial-JTAG, no USB OTG) in the ESP8684 datasheet. Console/flashing via UART0."
+  },
+  "jtag": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "uart0_default": {
+    "tx": 20,
+    "rx": 19
+  },
+  "adc1": {
+    "0": 0,
+    "1": 1,
+    "2": 2,
+    "3": 3,
+    "4": 4
+  },
+  "adc2": {},
+  "adc2_wifi_conflict": null,
+  "has_wifi": true,
+  "has_bt_classic": false,
+  "has_ble": true,
+  "notes": [
+    "JTAG mapping (ESP8684 datasheet IO MUX Table 4): MTMS=GPIO4, MTDI=GPIO5, MTCK=GPIO6, MTDO=GPIO7. These overlap ADC1_CH4 (GPIO4) and the RTC/deep-sleep-wakeup-capable GPIO0-5.",
+    "ESP-IDF GPIO page: 'The ESP32-C2 chip features 21 physical GPIO pins (GPIO0 ~ GPIO20). For chip variants with an SiP flash built in, GPIO11 ~ GPIO17 are dedicated to connecting the SiP flash; therefore, only 14 GPIO pins are available.' The ESP8684 (all current parts have in-package flash: ESP8684H2X/H4X) bonds out only GPIO0-10 and GPIO18-20.",
+    "flash_spi discrepancy inside the ESP-IDF GPIO page: the table/note mark only GPIO12-17 as 'SPI0/1 ... usually used for SPI flash', while the summary sentence says GPIO11-17 are dedicated to SiP flash. flash_spi uses the conservative 11-17; GPIO11's exact role is not stated in the sources consulted.",
+    "Only one SAR ADC (ADC1, 5 channels on GPIO0-4) per ESP-IDF GPIO page and ESP8684 datasheet ('12-bit SAR ADC, up to 5 channels', 'One DIG ADC controller'). No ADC2 pins -> adc2 empty and adc2_wifi_conflict null. The ESP-IDF C2 ADC oneshot 'Hardware Limitations' has no ADC2/Wi-Fi item.",
+    "No ADC continuous-mode page exists for esp32c2 in ESP-IDF stable docs (fetch returned no Hardware Limitations section).",
+    "ESP-IDF GPIO page: 'GPIO0-5 can be used to wake up the chip from Deep-sleep mode. Other GPIOs can only wake up the chip from Light-sleep mode.'",
+    "No input-only pins: all IO MUX functions are I/O/T in the datasheet and the ESP-IDF page lists no GPI pins.",
+    "Strapping hold time t1 min 3 ms after CHIP_EN goes high (datasheet Table 11). GPIO8=0 with GPIO9=0 is not a listed boot mode.",
+    "Datasheet: U0TXD (GPIO20) is output-enabled with weak pull-up after reset; U0RXD (GPIO19) input with weak pull-up; GPIO9 has weak pull-up after reset.",
+    "ESP-IDF refers to the ESP8684 datasheet for this target; the strapping/pin data here come from ESP8684 Series Datasheet v2.3.",
+    "Datasheet section 3.3: ROM bootloader assumes a 40 MHz crystal; with a 26 MHz crystal the ROM UART baud is ~74880.",
+    "toolchain_prefix confirmed from ESP-IDF docs: riscv32-esp-elf-gdb and riscv32-esp-elf-addr2line."
+  ],
+  "sources": [
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32c2/api-reference/peripherals/gpio.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32c2/api-reference/peripherals/adc/adc_oneshot.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32c2/api-guides/jtag-debugging/using-debugger.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32c2/api-guides/fatal-errors.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32c2/api-guides/tools/idf-monitor.html",
+    "https://www.espressif.com/sites/default/files/documentation/esp8684_datasheet_en.pdf (v2.3: Table 1, Table 2 Pin Overview, Table 3/4 IO MUX, Table 6 Analog Functions, Section 2.3.3, Section 3 Boot Configurations, Section 4.2.2.1 SAR ADC)",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32c2/api-guides/tools/idf-tools.html"
+  ]
+}

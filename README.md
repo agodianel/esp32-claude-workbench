@@ -1,471 +1,249 @@
 <div align="center">
 
-# ⚡ ESP32 Claude Workbench
+# ⚡ ESP32 Workbench
 
-![ESP32 Claude Workbench Architecture](assets/banner_flow.png)
+![ESP32 Workbench Architecture](assets/banner_flow.png)
 
-**Deterministic AI workflow for ESP32 firmware development.**
+**Hardware-aware skills and tools for AI-assisted ESP32 firmware development.**
+Works with Claude Code, OpenAI Codex, Cursor, GitHub Copilot, Gemini CLI and Google Antigravity.
 
 [![CI](https://github.com/agodianel/esp32-claude-workbench/actions/workflows/ci.yml/badge.svg)](https://github.com/agodianel/esp32-claude-workbench/actions/workflows/ci.yml)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+[![Agent Skills](https://img.shields.io/badge/Agent%20Skills-spec%20compliant-purple.svg)](https://agentskills.io/specification)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 *Stop prompting. Start engineering.*
 
-[Quick Start](#-quick-start) · [Skills](#-skills) · [Playbooks](#-debug-playbooks) · [Testing](#-testing-strategy) · [Contributing](#-contributing)
+[Install](#-install) · [Skills](#-skills) · [Tools](#-tools) · [Chips](#-supported-chips) · [Workflow](#-workflow) · [Upgrading from 0.1](#-upgrading-from-01)
 
 </div>
 
 ---
 
-## 🎯 What Is This?
+## 🎯 What it does
 
-ESP32 Claude Workbench is a **structured workflow system** for using Claude Code in ESP32 firmware development. It turns ad-hoc AI prompting into a disciplined, testable, repeatable development process.
+AI agents write plausible firmware that breaks on real hardware: a flash pin used as chip
+select, ADC2 read while Wi-Fi is on, a 2 KB stack for a TLS task, a GPIO that only exists on a
+different chip. The workbench gives your agent **deterministic tools and verified chip data**
+so it checks instead of guessing, plus a **disciplined workflow** (mission → contract → test
+plan → evidence → PR) so changes stay reviewable.
 
-This is **not** another prompt collection. It is a reliability layer for AI-assisted embedded development.
-
-### The Problem
-
-Most AI coding setups fail in firmware because they are:
-
-| Problem | Impact |
-|---------|--------|
-| Too chat-based | No persistent state across sessions |
-| Not hardware-aware | Wrong pin assumptions, unsafe RTOS calls |
-| Weak on testing | Code compiles but doesn't work |
-| Hard to review | AI-generated changes lack rationale and evidence |
-| No debugging flow | Same Guru Meditation errors waste hours repeatedly |
-
-### The Solution
-
-This repository provides:
-
-- 🏗️ **Structured workflows** — Mission files, implementation contracts, review checklists
-- 🧠 **Persistent state** — Markdown-based task memory across sessions
-- 🔧 **ESP32-specific rules** — Pin constraints, RTOS safety, memory management
-- 🧪 **Testing-first approach** — pytest-based validation from day one
-- 🐛 **Debug playbooks** — Standardized triage for common firmware failures
-- 📋 **Auditable artifacts** — Every change has rationale, tests, and risk notes
+- **11 skills** that follow the open [Agent Skills](https://agentskills.io) standard, so one set works in every major coding agent.
+- **9 chips**: ESP32, S2, S3, C2, C3, C5, C6, H2 and P4. Pin facts come from Espressif docs, with a source link for each.
+- **13 MCP tools and an `esp32wb` CLI**: pin audit, crash decoder, build-log triage, partition and sdkconfig review, docs search and more.
+- **Zero dependencies.** The core is standard-library Python, and the MCP server runs on plain `python3` with no `pip install`.
+- **Guard hook for Claude Code**: every edit to a `.c`/`.h` file is pin-audited, and errors go straight back to the agent.
 
 ---
 
-## 🚀 Quick Start
+## 📦 Install
 
-### Install
+Pick your agent. Every route installs the same skills; the plugin routes also register the
+MCP server.
+
+### Claude Code: plugin (skills + MCP + hook)
+
+```text
+/plugin marketplace add agodianel/esp32-claude-workbench
+/plugin install esp32-workbench@esp32-workbench
+```
+
+On Claude Code 2.1.275 or later this is one step:
+`/plugin install esp32-workbench --marketplace agodianel/esp32-claude-workbench`
+
+Skills are then available as `/esp32-workbench:<skill>`, for example `/esp32-workbench:esp32-crash-review`.
+
+### OpenAI Codex: plugin
 
 ```bash
-# Clone the repository
-git clone https://github.com/agodianel/esp32-claude-workbench.git
-cd esp32-claude-workbench
-
-# Create virtual environment
-python3 -m venv .venv
-source .venv/bin/activate
-
-# Install for development
-pip install -e ".[dev]"
+codex plugin marketplace add agodianel/esp32-claude-workbench
 ```
 
-### Run Tests
+Then open `/plugins` in the Codex CLI and install **ESP32 Workbench**. Invoke skills with `$esp32-pin-audit` or let Codex pick them.
+
+### Gemini CLI: extension
 
 ```bash
-pytest tests/ -v
+gemini extensions install https://github.com/agodianel/esp32-claude-workbench
 ```
 
-### Start a Mission
+### Google Antigravity: plugin
 
-1. Copy the mission template:
-   ```bash
-   cp missions/templates/mission_template.md missions/2026-03-my-feature.md
-   ```
-
-2. Fill in the sections: Goal, Board, Constraints, Acceptance Criteria.
-
-3. Use Claude to generate an implementation contract:
-   ```bash
-   generate-contract "Add Wi-Fi reconnection with exponential backoff" \
-     --files "main/wifi_manager.c|CREATE|Reconnection handler" \
-     --tests "Verify backoff timing" "Test retry counter reset" \
-     --risks "Race condition on shared connection flag"
-   ```
-
-4. Review the contract, then implement.
-
-5. Validate your mission file:
-   ```bash
-   validate-mission missions/2026-03-my-feature.md
-   ```
----
-
-## 🤖 MCP Server Setup (Claude Code Integration)
-
-### 1. Install dependencies
 ```bash
-cd mcp
-pip install -r requirements.txt
+agy plugin install https://github.com/agodianel/esp32-claude-workbench
 ```
 
-### 2. Build the local ESP32 docs index (run once, ~5 min)
+### Cursor, GitHub Copilot, or any Agent Skills client
+
 ```bash
-python scripts/index_esp_docs.py
-```
-This downloads ESP32 TRMs and datasheets and builds a local vector search index.
-No API key required. Everything runs on your machine.
+# Skills only, using an installer you probably already have
+npx skills add agodianel/esp32-claude-workbench
+gh skill install agodianel/esp32-claude-workbench --agent github-copilot   # or cursor, codex, gemini-cli, antigravity
 
-### 3. Register the MCP server with Claude Code
+# Skills + MCP config for any combination of agents, in one step
+uvx --from git+https://github.com/agodianel/esp32-claude-workbench \
+  esp32wb install-skills --agent cursor copilot --with-mcp
+```
+
+### Set up a firmware project in one command
+
+From your ESP-IDF project root:
+
 ```bash
-claude mcp add esp32-workbench -- python /path/to/esp32-claude-workbench/mcp/mcp_server.py
+uvx --from git+https://github.com/agodianel/esp32-claude-workbench esp32wb init . --agents all
 ```
 
-Or add `.mcp.json` to your ESP32 project root:
-```json
-{
-  "mcpServers": {
-    "esp32-workbench": {
-      "command": "python",
-      "args": ["/path/to/esp32-claude-workbench/mcp/mcp_server.py"]
-    }
-  }
-}
-```
+This writes `AGENTS.md` (firmware rules every agent reads) and `CLAUDE.md` (which imports
+it), creates `missions/`, installs the skills into `.claude/skills/` and `.agents/skills/`,
+and registers the MCP server for each agent.
 
-### 4. Verify it works
-In Claude Code, ask: "Search ESP docs for ADC2 Wi-Fi conflict"
-Claude should call the `search_esp_docs` tool and return grounded results.
+<details>
+<summary>Where things go, per agent</summary>
 
-### 5. Manual Testing (No Claude Code required)
-If you do not have Claude Code installed, or just want to test the tools manually, you can use the official MCP Inspector. This spins up a visual web interface to run the tools.
-```bash
-cd mcp
-npx -y @modelcontextprotocol/inspector uv run mcp_server.py
-```
+| Agent | Project skills | User skills | MCP config written by `--with-mcp` |
+|-------|---------------|-------------|------------------------------------|
+| Claude Code | `.claude/skills/` | `~/.claude/skills/` | `.mcp.json` |
+| Codex | `.agents/skills/` | `~/.agents/skills/` | `.codex/config.toml` / `~/.codex/config.toml` |
+| Cursor | `.agents/skills/` | `~/.agents/skills/` | `.cursor/mcp.json` |
+| GitHub Copilot | `.agents/skills/` | `~/.agents/skills/` | `.vscode/mcp.json` / `~/.copilot/mcp-config.json` |
+| Gemini CLI | `.agents/skills/` | `~/.agents/skills/` | `.gemini/settings.json` |
+| Antigravity | `.agents/skills/` | `~/.gemini/config/skills/`, `~/.gemini/antigravity-cli/skills/` | `.agents/mcp_config.json` |
 
----
-
-## 📁 Repository Structure
-
-```
-esp32-claude-workbench/
-├── CLAUDE.md                    # Claude Code rules for ESP32
-├── CONTRIBUTING.md              # Contribution guide
-├── .claude/skills/              # Claude Code skill definitions
-│   ├── hardware_check/          #   Verify board hardware limitations
-│   ├── repo_scout/              #   Scan project structure
-│   ├── feature_contract/        #   Generate implementation contracts
-│   ├── esp32_pin_audit/         #   Audit GPIO pin usage
-│   ├── esp32_arch_review/       #   Review firmware architecture
-│   ├── esp32_test_plan/         #   Generate test plans
-│   ├── esp32_log_triage/        #   Parse serial logs
-│   ├── esp32_crash_review/      #   Analyze crash dumps
-│   └── pr_prepare/              #   Prepare pull requests
-├── boards/                      # Board-specific pinouts and limitations
-├── docs_sources.yaml            # Documentation sources for FAISS RAG index
-├── mcp/                         # FastMCP Server Backend
-│   ├── mcp_server.py            #   Main server entrypoint
-│   ├── requirements.txt         #   ML/RAG python dependencies
-│   └── tools/                   #   MCP Python Tools
-│       ├── mission_generator.py #     Create standardized mission files
-│       ├── pin_audit.py         #     Audit GPIO conflicts and rules
-│       ├── sdkconfig_check.py   #     Verify production readiness
-│       └── search_docs.py       #     Query the local FAISS index
-├── missions/
-│   ├── templates/               # Mission & contract templates
-│   └── examples/                # Worked example missions
-├── playbooks/                   # Debug & triage playbooks
-│   ├── hardware_limitations.md  #   Hardware quirks, strapping pins, ADC2
-│   ├── build_failure.md         #   Build error triage
-│   ├── guru_meditation.md       #   Crash analysis
-│   ├── wifi_debug.md            #   Wi-Fi troubleshooting
-│   ├── i2c_bringup.md           #   I2C peripheral setup
-│   ├── spi_bringup.md           #   SPI peripheral setup
-│   ├── ble_debug.md             #   BLE debugging
-│   ├── ota_update.md            #   OTA update issues
-│   ├── watchdog_reset.md        #   Watchdog timer issues
-│   └── memory_review.md         #   Memory leak & corruption
-├── scripts/
-│   └── index_esp_docs.py        # Crawler and FAISS RAG vector indexer
-├── templates/
-│   ├── esp-idf-basic/           # Minimal ESP-IDF starter
-│   ├── wifi-station/            # Wi-Fi station with reconnect
-│   └── mqtt-node/               # MQTT telemetry with LWT
-├── tools/                       # Python CLI automation
-│   ├── validate_mission.py      #   Mission file validator
-│   ├── generate_contract.py     #   Contract generator
-│   ├── summarize_logs.py        #   Log analyzer
-│   ├── scan_pins.py             #   GPIO pin scanner & conflict detector
-│   ├── analyze_sdkconfig.py     #   sdkconfig misconfiguration checker
-│   └── check_task_stacks.py     #   FreeRTOS task stack analyzer
-├── tests/                       # 148+ pytest unit and integration tests
-└── .github/workflows/           # GitHub Actions CI pipelines
-```
+Print a config snippet without writing anything: `esp32wb mcp-config codex`.
+</details>
 
 ---
 
 ## 🛠️ Skills
 
-Skills are structured Claude Code instructions for specific tasks. Use them as slash commands:
+| Skill | Use it when… |
+|-------|--------------|
+| `esp32-repo-scout` | Starting on an unfamiliar ESP-IDF project |
+| `esp32-feature-contract` | Before any change: creates the mission and implementation contract |
+| `esp32-pin-audit` | Adding or changing GPIO, I2C, SPI, UART, ADC or LEDC pins; choosing pins for a board |
+| `esp32-peripheral-bringup` | Bringing up an I2C/SPI/UART/ADC device that doesn't respond |
+| `esp32-arch-review` | Reviewing RTOS safety, memory, error handling before merge |
+| `esp32-test-plan` | Planning host-side, Unity and on-target tests |
+| `esp32-build-fix` | `idf.py build` or flashing fails |
+| `esp32-crash-review` | Guru Meditation, abort, assert, stack overflow, watchdog reset |
+| `esp32-log-triage` | Reading a serial log: boot loops, Wi-Fi/BLE drops, resets |
+| `esp32-release-check` | Pre-release: sdkconfig, partitions, OTA, security settings |
+| `esp32-pr-prepare` | Writing the PR with test evidence, risks and rollback |
 
-| Command | Skill | What It Does |
-|---------|-------|-------------|
-| `/scout` | `repo_scout` | Scan project structure, map components, identify dependencies |
-| `/contract` | `feature_contract` | Generate implementation contract before any code changes |
-| `/hw-check` | `esp32_hardware_check` | Verify user board against hardware limitations |
-| `/pin-audit` | `esp32_pin_audit` | Audit GPIO usage for conflicts and reserved pin violations |
-| `/arch-review` | `esp32_arch_review` | Review architecture for RTOS safety, memory, error handling |
-| `/test-plan` | `esp32_test_plan` | Generate multi-layer test plan |
-| `/triage-log` | `esp32_log_triage` | Parse serial logs, classify errors, identify boot issues |
-| `/review-crash` | `esp32_crash_review` | Analyze Guru Meditation errors and crash dumps |
-| `/prcraft` | `pr_prepare` | Prepare PR with test evidence and risk assessment |
+Each skill tells the agent which tool to run, and includes debugging playbooks in its
+`references/` folder.
 
-### Example: Implementation Contract
+---
 
-Before writing any code, generate a contract:
+## 🔧 Tools
 
+The same tools are available as an MCP server (`esp32wb-mcp`) and a CLI (`esp32wb`). Every
+command accepts `--json`.
+
+| CLI | MCP tool | What it does |
+|-----|----------|--------------|
+| `esp32wb doctor [path]` | `project_doctor` | Runs every check below on a project and gives one report |
+| `esp32wb pins <path>` | `pin_audit` | Flags flash/PSRAM, strapping, USB, UART0 and input-only pin misuse, ADC2+Wi-Fi use and double assignments, for the project's chip |
+| `esp32wb chip <target>` | `chip_info` | Verified pin facts for a chip, with Espressif source links |
+| `esp32wb crash <log> --elf app.elf` | `crash_decode` | Decodes Xtensa and RISC-V panics, runs `addr2line` and classifies the cause (NULL dereference, stack overflow, heap corruption…) |
+| `esp32wb build-log <log>` | `build_log_triage` | Missing headers and the component to add, linker errors, IRAM/DRAM overflow, partition too small, target mismatch, serial-port problems |
+| `esp32wb partitions <csv>` | `partition_check` | Alignment, overlaps, flash size, OTA slots and otadata, NVS, coredump, whether the app binary fits |
+| `esp32wb sdkconfig <file>` | `sdkconfig_review` | Security, stability and production-readiness review |
+| `esp32wb stacks <path>` | `stack_check` | Undersized FreeRTOS task stacks |
+| `esp32wb logs <log>` | `log_summary` | Serial log summary with reset reason |
+| `esp32wb docs search "<q>"` | `search_esp_docs` | Local search over Espressif TRMs and datasheets, with page citations |
+| `esp32wb mission new/validate` | `create_mission` / `validate_mission` | Persistent task state |
+| `esp32wb contract "<summary>"` | `generate_contract` | Implementation contract |
+
+```bash
+idf.py build 2>&1 | esp32wb build-log -          # pipe straight from the build
+esp32wb crash monitor.log --elf build/app.elf     # decode with the right toolchain for the chip
 ```
-You: /contract
 
-Claude: I'll generate an implementation contract.
+### Docs search
 
-# Implementation Contract
+Searching needs no dependencies; building the index needs `pypdf`:
 
-## Change Summary
-Add exponential backoff to Wi-Fi reconnection handler.
+```bash
+pip install 'esp32-workbench[docs]'
+esp32wb docs index                              # downloads the ESP32/S3/C3/C6 TRMs + datasheets
+esp32wb docs index --file my_sensor.pdf --no-builtin   # add your own datasheets
+```
 
-## Affected Files
-| File | Action | Description |
-|------|--------|-------------|
-| main/wifi_manager.c | MODIFY | Add backoff timer logic |
-| main/wifi_manager.h | MODIFY | Add backoff config struct |
+Search uses SQLite full-text search (BM25). For embedding-based search, install
+`esp32-workbench[semantic]` and run `esp32wb docs index --semantic`.
 
-## Risk Assessment
-### Concurrency: MEDIUM
-- Backoff timer accessed from event handler and reconnect task.
-- Mitigation: Use atomic variable for backoff delay.
+---
 
-## Test Plan
-- [ ] Backoff sequence: 1s → 2s → 4s → 8s → 16s → 32s → 60s
-- [ ] Reset after successful connection
-- [ ] Maximum retry limit enforced
+## 🧩 Supported chips
+
+`esp32` · `esp32s2` · `esp32s3` · `esp32c2` · `esp32c3` · `esp32c5` · `esp32c6` · `esp32h2` · `esp32p4`
+
+The target is read from `CONFIG_IDF_TARGET` in `sdkconfig` / `sdkconfig.defaults`, or set it
+with `--target`. Each chip file in [`src/esp32_workbench/data/chips/`](src/esp32_workbench/data/chips/)
+lists the Espressif pages its facts came from. Facts that couldn't be confirmed are left
+empty rather than guessed, and the notes record where Espressif's own sources disagree.
+
+---
+
+## 🔄 Workflow
+
+```text
+1. Issue: "Wi-Fi drops after 30 minutes on the S3 board"
+2. esp32-repo-scout        → components, tasks, pins, target
+3. esp32-feature-contract  → missions/2026-10-28-wifi-stability.md + contract (scope, risks, rollback)
+4. Review and accept the contract
+5. esp32-test-plan         → host / Unity / on-target cases
+6. Implement               → pin guard hook audits every C/H edit (Claude Code)
+7. esp32wb doctor .        → pins, stacks, sdkconfig, partitions
+8. esp32-arch-review       → RTOS safety, memory, error paths
+9. esp32-pr-prepare        → PR with test evidence, risk notes, rollback
+10. Mission → DONE
 ```
 
 ---
 
-## 🐛 Debug Playbooks
+## 🧪 Development
 
-Step-by-step triage guides for common ESP32 failures:
+```bash
+git clone https://github.com/agodianel/esp32-claude-workbench.git
+cd esp32-claude-workbench
+uv sync --extra dev
+uv run pytest                 # 270+ tests, no hardware needed
+uv run ruff check . && uv run ruff format --check .
+claude plugin validate .      # Claude Code plugin + marketplace
+```
 
-| Playbook | When to Use |
-|----------|------------|
-| [Hardware Limitations](playbooks/hardware_limitations.md) | Pin constraints, strapping pins, ADC2/Wi-Fi conflicts |
-| [Build Failure](playbooks/build_failure.md) | Compilation errors, linker failures, CMake issues |
-| [Guru Meditation](playbooks/guru_meditation.md) | CPU exceptions, crashes, backtrace analysis |
-| [Wi-Fi Debug](playbooks/wifi_debug.md) | Connection failures, drops, authentication issues |
-| [I2C Bring-Up](playbooks/i2c_bringup.md) | I2C communication failures, bus hangs |
-| [SPI Bring-Up](playbooks/spi_bringup.md) | SPI peripheral misconfiguration, clock speed issues |
-| [BLE Debugging](playbooks/ble_debug.md) | BLE advertising failures, GATT connection drops |
-| [OTA Updates](playbooks/ota_update.md) | Firmware update failures, boot loops, invalid partitions |
-| [Watchdog Reset](playbooks/watchdog_reset.md) | Task/interrupt watchdog triggers |
-| [Memory Review](playbooks/memory_review.md) | Heap exhaustion, leaks, stack overflows |
+| Layer | What | Hardware? |
+|-------|------|-----------|
+| Repository | Tools, chip data, skills spec, manifests, MCP protocol (including interop with the official MCP SDK) | No |
+| Host-side C | Pure logic compiled natively | No |
+| ESP-IDF Unity | Components in isolation | Yes |
+| Target | `pytest-embedded`, marked `@pytest.mark.hardware` | Yes |
 
-Each playbook includes **triggers**, **symptoms**, **triage steps**, **resolution checklists**, and **prevention** guidance.
+Repository layout: [`AGENTS.md`](AGENTS.md). Contribution guide: [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
+### Project templates
+
+[`templates/`](templates/) holds ready-to-build ESP-IDF projects (`esp-idf-basic`,
+`wifi-station`, `mqtt-node`). CI runs `esp32wb doctor` on each one.
 
 ---
 
-## 📋 Mission Files
+## ⬆️ Upgrading from 0.1
 
-Every task gets a persistent markdown file that preserves state across sessions:
+| 0.1 | 0.2 |
+|-----|-----|
+| `.claude/skills/esp32_pin_audit` etc. | `skills/esp32-pin-audit` (kebab-case, as the open spec requires) |
+| `hardware_check` skill | merged into `esp32-pin-audit` |
+| `playbooks/*.md` | `skills/<skill>/references/*.md` |
+| `python mcp/mcp_server.py` + `mcp/requirements.txt` | `esp32wb-mcp` (no dependencies) or the plugin |
+| `python scripts/index_esp_docs.py` | `esp32wb docs index` |
+| `tools.*` Python package | `esp32_workbench.*` |
+| `scan-pins`, `analyze-sdkconfig`, … | still work; `esp32wb <command>` is the new front door |
 
-```markdown
-# Mission: ESP32 Wi-Fi Reconnect Handler
-
-## Goal
-Implement robust Wi-Fi reconnection with exponential backoff.
-
-## Board / Target
-- Chip: ESP32
-- ESP-IDF: v5.2
-
-## Acceptance Criteria
-- [ ] Auto-reconnects after AP disconnect
-- [ ] Exponential backoff: 1s → 2s → 4s → ... → 60s
-- [ ] Status queryable via wifi_manager_is_connected()
-
-## Current Status
-- State: IN PROGRESS
-- Last updated: 2026-03-26
-- Next Step: Implement backoff timer
-```
-
-This creates **visible project memory** — Claude can resume work by reading the mission file.
-
----
-
-## 🧪 Testing Strategy
-
-Testing is a first-class citizen, organized in layers:
-
-| Layer | What | Tools | Hardware Needed? |
-|-------|------|-------|-----------------|
-| **1. Repository Logic** | Validate templates, tooling, playbooks | `pytest` | No |
-| **2. Host-Side Logic** | Test pure C (parsers, state machines) | `pytest` + native compile | No |
-| **3. ESP-IDF Unit Tests** | Test components in isolation | ESP-IDF Unity | Yes |
-| **4. Target Integration** | Flash and validate on device | `pytest-embedded` | Yes |
-| **5. CI Publishing** | JUnit XML, coverage, artifacts | GitHub Actions | No |
-
-### No-Hardware MVP
-
-You don't need an ESP32 to get value. Layers 1–2 and 5 work without hardware:
-
-```bash
-# Run all no-hardware tests
-pytest tests/ -v -m "not hardware"
-
-# With coverage
-pytest tests/ -v --cov=tools --cov-report=term-missing
-```
-
-### Test Stack
-
-```
-pytest                  # Test runner
-pytest-cov              # Coverage reporting
-pytest-xdist            # Parallel execution
-pytest-embedded         # ESP32 target testing (when hardware available)
-```
-
----
-
-## 🔧 Python Tools
-
-### `validate-mission`
-Validate mission files for required sections:
-```bash
-validate-mission missions/2026-03-my-feature.md
-# ✅ All required sections present
-```
-
-### `generate-contract`
-Generate implementation contracts from the command line:
-```bash
-generate-contract "Add BLE temperature service" \
-  --files "main/ble_temp.c|CREATE|BLE GATT service" \
-  --risks "Stack size for BLE task" \
-  --tests "Service discovery" "Temperature read" "Notification subscribe"
-```
-
-### `summarize-logs`
-Analyze ESP32 serial log output:
-```bash
-summarize-logs serial_capture.log
-# Outputs: error count, crash detection, reset reason, component breakdown
-```
-
-### `scan-pins`
-Scan C/H files for GPIO pin assignments to detect conflicts, unsafe strapping pin usage, and ADC2/Wi-Fi incompatibilities:
-```bash
-scan-pins main/ --uses-wifi
-# Flags if ADC2 pins are used while Wi-Fi is enabled
-```
-
-### `analyze-sdkconfig`
-Analyze `sdkconfig` files against a comprehensive set of security, stability, and ESP-IDF production readiness rules:
-```bash
-analyze-sdkconfig sdkconfig
-# Warns about missing heap poisoning, low tick rates, or weak passwords
-```
-
-### `check-stacks`
-Scan source code for FreeRTOS `xTaskCreate` calls to statically detect tasks with potentially insufficient stack sizes:
-```bash
-check-stacks main/
-# Flags Wi-Fi/TLS tasks that are given dangerously small stacks
-```
-
----
-
-## 🔄 Workflow: From Issue to PR
-
-Here's a complete example of the workbench workflow:
-
-```
-1. Issue: "Wi-Fi drops after 30 minutes"
-
-2. /scout
-   → Scan project, identify Wi-Fi components and task architecture
-
-3. Create mission file
-   → missions/2026-03-wifi-stability.md
-
-4. /contract
-   → Generate implementation contract with scope, risks, tests
-
-5. Review and accept contract
-
-6. Implement changes
-   → Follow contract scope, update mission status
-
-7. /test-plan
-   → Generate test plan covering all layers
-
-8. Run tests
-   → pytest tests/ -v
-
-9. /arch-review
-   → Check RTOS safety, error handling, memory impact
-
-10. /pin-audit (if GPIO changes)
-    → Verify no pin conflicts
-
-11. /prcraft
-    → Generate PR with evidence, risk notes, and review checklist
-
-12. Update mission → State: DONE
-```
-
----
-
-## 🏗️ Project Templates
-
-Start new ESP-IDF projects with a ready-to-go template:
-
-```bash
-cp -r templates/esp-idf-basic/ ~/my-new-project/
-cd ~/my-new-project/
-idf.py set-target esp32
-idf.py build
-```
-
-The template includes:
-- Proper `CMakeLists.txt` structure
-- NVS initialization
-- Heap monitoring
-- Sensible `sdkconfig.defaults`
-- Stack overflow detection enabled
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for details.
-
-You can contribute:
-- **New skills** — Claude Code skill definitions
-- **New playbooks** — Debug and triage guides
-- **New templates** — ESP-IDF project starters
-- **Tool improvements** — Python automation
-- **Bug fixes and docs** — Always welcome
-
-```bash
-# Development setup
-pip install -e ".[dev]"
-pytest tests/ -v
-```
-
----
-
-## 🌟 Acknowledgments
-
-Built with the assistance of [Claude](https://github.com/claude) by Anthropic.
+If you registered the old server with `claude mcp add esp32-workbench -- python …/mcp/mcp_server.py`,
+remove it (`claude mcp remove esp32-workbench`) and install the plugin instead.
 
 ---
 
@@ -478,16 +256,15 @@ Built with the assistance of [Claude](https://github.com/claude) by Anthropic.
    <img alt="Star History Chart" src="https://api.star-history.com/image?repos=agodianel/esp32-claude-workbench&type=date&legend=top-left" />
  </picture>
 </a>
+
 ---
 
 ## 📄 License
 
 MIT — see [LICENSE](LICENSE).
 
----
-
 <div align="center">
 
-**ESP32 Claude Workbench** — *Structure over magic. Testing over claims. Workflows over prompts.*
+**ESP32 Workbench** — *Structure over magic. Testing over claims. Workflows over prompts.*
 
 </div>

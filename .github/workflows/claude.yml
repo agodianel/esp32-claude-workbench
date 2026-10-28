@@ -45,11 +45,8 @@ jobs:
             echo "Test report available at reports/junit.xml"
           fi
           echo ""
-          echo "### CLAUDE.md Rules"
-          cat CLAUDE.md
+          echo "### AGENTS.md Rules"
+          cat AGENTS.md
           echo ""
           echo "### Available Skills"
-          ls -1 .claude/skills/
-          echo ""
-          echo "### Available Playbooks"
-          ls -1 playbooks/
+          ls -1 skills/

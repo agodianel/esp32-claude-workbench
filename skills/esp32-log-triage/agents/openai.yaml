@@ -1,0 +1,5 @@
+interface:
+  display_name: "ESP32 Log Triage"
+  short_description: "Classify serial logs: resets, boot loops, WDT, brownout, Wi-Fi, BLE"
+policy:
+  allow_implicit_invocation: true

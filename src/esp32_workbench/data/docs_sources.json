@@ -1,0 +1,12 @@
+{
+  "sources": [
+    {"name": "ESP32 Technical Reference Manual", "url": "https://www.espressif.com/sites/default/files/documentation/esp32_technical_reference_manual_en.pdf", "targets": ["esp32"]},
+    {"name": "ESP32 Datasheet", "url": "https://www.espressif.com/sites/default/files/documentation/esp32_datasheet_en.pdf", "targets": ["esp32"]},
+    {"name": "ESP32-S3 Technical Reference Manual", "url": "https://www.espressif.com/sites/default/files/documentation/esp32-s3_technical_reference_manual_en.pdf", "targets": ["esp32s3"]},
+    {"name": "ESP32-S3 Datasheet", "url": "https://www.espressif.com/sites/default/files/documentation/esp32-s3_datasheet_en.pdf", "targets": ["esp32s3"]},
+    {"name": "ESP32-C3 Technical Reference Manual", "url": "https://www.espressif.com/sites/default/files/documentation/esp32-c3_technical_reference_manual_en.pdf", "targets": ["esp32c3"]},
+    {"name": "ESP32-C3 Datasheet", "url": "https://www.espressif.com/sites/default/files/documentation/esp32-c3_datasheet_en.pdf", "targets": ["esp32c3"]},
+    {"name": "ESP32-C6 Technical Reference Manual", "url": "https://www.espressif.com/sites/default/files/documentation/esp32-c6_technical_reference_manual_en.pdf", "targets": ["esp32c6"]},
+    {"name": "ESP32-C6 Datasheet", "url": "https://www.espressif.com/sites/default/files/documentation/esp32-c6_datasheet_en.pdf", "targets": ["esp32c6"]}
+  ]
+}

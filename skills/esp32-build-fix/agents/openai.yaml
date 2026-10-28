@@ -1,0 +1,5 @@
+interface:
+  display_name: "ESP32 Build Fix"
+  short_description: "Triage idf.py build, link, Kconfig and esptool flashing failures"
+policy:
+  allow_implicit_invocation: true

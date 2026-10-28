@@ -1,0 +1,20 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "esp32-workbench",
+  "version": "0.2.0",
+  "description": "Multi-chip ESP32 firmware skills (pin audit, crash decoding, build triage, release checks, contracts) with a zero-dependency MCP server.",
+  "author": { "name": "agodianel", "url": "https://github.com/agodianel" },
+  "homepage": "https://github.com/agodianel/esp32-claude-workbench",
+  "repository": "https://github.com/agodianel/esp32-claude-workbench",
+  "license": "MIT",
+  "keywords": ["esp32", "esp-idf", "firmware", "embedded", "freertos"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "ESP32 Workbench",
+        "shortDescription": "Hardware-aware ESP32 firmware skills and tools",
+        "defaultPrompt": "Run a project doctor on this ESP-IDF project"
+      }
+    }
+  }
+}

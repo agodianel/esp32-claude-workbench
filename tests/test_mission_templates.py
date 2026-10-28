@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from tools.validate_mission import REQUIRED_SECTIONS, extract_sections, validate_mission
+from esp32_workbench.mission import REQUIRED_SECTIONS, extract_sections, validate_mission
 
 # Path to the project root
 ROOT = Path(__file__).parent.parent
@@ -70,7 +70,9 @@ class TestMissionTemplateFile:
     """Test that the actual mission template file is valid."""
 
     def test_mission_template_has_all_required_sections(self):
-        template_path = ROOT / "missions" / "templates" / "mission_template.md"
+        template_path = (
+            ROOT / "skills" / "esp32-feature-contract" / "assets" / "mission_template.md"
+        )
         assert template_path.exists(), f"Mission template not found at {template_path}"
 
         content = template_path.read_text(encoding="utf-8")

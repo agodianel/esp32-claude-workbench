@@ -1,0 +1,5 @@
+interface:
+  display_name: "ESP32 Release Check"
+  short_description: "GO/NO-GO: sdkconfig, partitions, OTA rollback, secure boot, debug"
+policy:
+  allow_implicit_invocation: true

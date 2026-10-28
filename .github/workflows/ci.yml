@@ -15,46 +15,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        run: pip install -e ".[dev]"
-
-      - name: Run Ruff linter
-        run: ruff check tools/ tests/
-
-      - name: Run Ruff formatter check
-        run: ruff format --check tools/ tests/
+      - uses: astral-sh/setup-uv@v6
+      - name: Ruff
+        run: |
+          uv run --extra dev ruff check .
+          uv run --extra dev ruff format --check .
 
   test:
     name: Test (Python ${{ matrix.python-version }})
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         python-version: ["3.9", "3.10", "3.11", "3.12", "3.13"]
-
     steps:
       - uses: actions/checkout@v6
-
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v6
+      - uses: astral-sh/setup-uv@v6
         with:
           python-version: ${{ matrix.python-version }}
-
-      - name: Install dependencies
-        run: pip install -e ".[dev]"
-
       - name: Run tests
         run: |
-          pytest tests/ -v --tb=short \
+          uv run --extra dev pytest --tb=short \
             --junitxml=reports/junit.xml \
-            --cov=tools --cov-report=xml:reports/coverage.xml \
+            --cov=esp32_workbench --cov-report=xml:reports/coverage.xml \
             --cov-report=term-missing
-
       - name: Upload test results
         uses: actions/upload-artifact@v7
         if: always()
@@ -63,74 +47,24 @@ jobs:
           path: reports/
           retention-days: 30
 
-  validate-structure:
-    name: Validate Repository Structure
+  package:
+    name: Package and launchers
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-
-      - name: Check required files exist
+      - uses: astral-sh/setup-uv@v6
+      - name: Build wheel
+        run: uv build --wheel
+      - name: Wheel installs skills without a checkout
         run: |
-          echo "Checking required files..."
-          files=(
-            "README.md"
-            "CLAUDE.md"
-            "LICENSE"
-            "CONTRIBUTING.md"
-            "pyproject.toml"
-            ".gitignore"
-            "missions/templates/mission_template.md"
-            "missions/templates/implementation_contract.md"
-            "missions/templates/test_plan_template.md"
-            "playbooks/build_failure.md"
-            "playbooks/guru_meditation.md"
-            "playbooks/wifi_debug.md"
-            "playbooks/i2c_bringup.md"
-            "playbooks/watchdog_reset.md"
-            "playbooks/memory_review.md"
-            "tools/validate_mission.py"
-            "tools/generate_contract.py"
-            "tools/summarize_logs.py"
-          )
-          missing=0
-          for f in "${files[@]}"; do
-            if [ ! -f "$f" ]; then
-              echo "  MISSING: $f"
-              missing=$((missing + 1))
-            else
-              echo "  OK: $f"
-            fi
-          done
-          if [ $missing -gt 0 ]; then
-            echo "ERROR: $missing required file(s) missing"
-            exit 1
-          fi
-          echo "All required files present."
-
-      - name: Check skill directories
+          mkdir -p /tmp/proj
+          uvx --from dist/*.whl esp32wb install-skills --agent all --project /tmp/proj
+          test -f /tmp/proj/.claude/skills/esp32-pin-audit/SKILL.md
+          test -f /tmp/proj/.agents/skills/esp32-crash-review/SKILL.md
+      - name: No-install launchers run on plain python3
         run: |
-          echo "Checking skill directories..."
-          skills=(
-            "repo_scout"
-            "feature_contract"
-            "esp32_pin_audit"
-            "esp32_arch_review"
-            "esp32_test_plan"
-            "esp32_log_triage"
-            "esp32_crash_review"
-            "pr_prepare"
-          )
-          missing=0
-          for s in "${skills[@]}"; do
-            if [ ! -f ".claude/skills/$s/SKILL.md" ]; then
-              echo "  MISSING: .claude/skills/$s/SKILL.md"
-              missing=$((missing + 1))
-            else
-              echo "  OK: .claude/skills/$s/SKILL.md"
-            fi
-          done
-          if [ $missing -gt 0 ]; then
-            echo "ERROR: $missing skill file(s) missing"
-            exit 1
-          fi
-          echo "All skill files present."
+          python3 bin/esp32wb chip esp32s3 > /dev/null
+          printf '%s\n' '{"jsonrpc":"2.0","id":1,"method":"tools/list"}' \
+            | python3 bin/esp32wb-mcp | grep -q pin_audit
+      - name: Doctor on bundled templates
+        run: for t in templates/*/; do python3 bin/esp32wb doctor "$t"; done

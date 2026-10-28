@@ -1,6 +1,6 @@
 """Tests for implementation contract generation."""
 
-from tools.generate_contract import generate_contract
+from esp32_workbench.contract import generate_contract
 
 
 class TestGenerateContract:

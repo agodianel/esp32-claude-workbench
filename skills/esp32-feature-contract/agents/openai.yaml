@@ -1,0 +1,5 @@
+interface:
+  display_name: "ESP32 Feature Contract"
+  short_description: "Mission file + implementation contract before any firmware edit"
+policy:
+  allow_implicit_invocation: true

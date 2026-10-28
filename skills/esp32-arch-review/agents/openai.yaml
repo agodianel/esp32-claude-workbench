@@ -1,0 +1,5 @@
+interface:
+  display_name: "ESP32 Architecture Review"
+  short_description: "Review FreeRTOS, memory, ISR, error handling and config safety"
+policy:
+  allow_implicit_invocation: true

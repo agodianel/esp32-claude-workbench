@@ -1,0 +1,12 @@
+{
+  "name": "esp32-workbench",
+  "interface": { "displayName": "ESP32 Workbench" },
+  "plugins": [
+    {
+      "name": "esp32-workbench",
+      "source": { "source": "local", "path": "./" },
+      "policy": { "installation": "AVAILABLE", "authentication": "ON_INSTALL" },
+      "category": "Coding"
+    }
+  ]
+}

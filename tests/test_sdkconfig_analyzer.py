@@ -1,6 +1,6 @@
 """Tests for the sdkconfig analyzer tool."""
 
-from tools.analyze_sdkconfig import analyze_config, parse_sdkconfig
+from esp32_workbench.sdkconfig import analyze_config, parse_sdkconfig
 
 
 class TestParseSDKConfig:

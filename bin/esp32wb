@@ -1,0 +1,11 @@
+#!/usr/bin/env python3
+"""Run esp32wb from a plugin checkout without installing (the core is stdlib-only)."""
+
+import sys
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
+
+from esp32_workbench.cli import main  # noqa: E402
+
+main()

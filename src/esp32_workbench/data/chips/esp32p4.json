@@ -1,0 +1,49 @@
+{
+  "target": "esp32p4",
+  "name": "ESP32-P4",
+  "arch": "riscv",
+  "toolchain_prefix": "riscv32-esp-elf",
+  "gpios": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54],
+  "input_only": [],
+  "no_internal_pull": [],
+  "strapping": {
+    "34": "JTAG signal source select, used with EFUSE_DIS_PAD_JTAG / EFUSE_DIS_USB_JTAG / EFUSE_JTAG_SEL_ENABLE (only consulted when JTAG_SEL_ENABLE is burned: 1 = USB Serial/JTAG, 0 = JTAG pins GPIO2-GPIO5). Default floating; datasheet: 'This pin does not have any internal pull resistors and the strapping value must be controlled by the external circuit that cannot be in a high impedance state.'",
+    "35": "Chip boot mode: 1 = SPI Boot (default, internal weak pull-up); 0 (with GPIO36=1) = Joint Download Boot (USB-Serial-JTAG, USB 2.0 OTG, UART, SPI slave download).",
+    "36": "Chip boot mode (must be 1 with GPIO35=0 for Joint Download Boot) and UART0 ROM message printing control with EFUSE_UART_PRINT_CONTROL. Default floating.",
+    "37": "Chip boot mode strapping pin (datasheet v0.7 Table 3-3 shows 'Any value' for SPI and Joint Download Boot and defers its function to TRM > Chip Boot Control). Default floating. Also the UART0 TX pin.",
+    "38": "Chip boot mode strapping pin (datasheet v0.7 Table 3-3 shows 'Any value' for SPI and Joint Download Boot and defers its function to TRM > Chip Boot Control). Default floating. Also the UART0 RX pin."
+  },
+  "flash_spi": [],
+  "psram": {"pins": [], "condition": "All ESP32-P4 variants have in-package PSRAM (ESP32-P4NRW16X 16 MB, ESP32-P4NRW32X 32 MB, per datasheet v0.7 Table 1-1). The datasheet pin overview shows no GPIO allocated to PSRAM (only VDD_PSRAM_0/1 / VDDO_PSRAM power pins), so no GPIO restriction applies."},
+  "usb_jtag": {"pins": [24, 25], "note": "GPIO24 = USB1P1_N0 (D-), GPIO25 = USB1P1_P0 (D+): connected to USB-Serial-JTAG by default; reconfiguring them as normal GPIOs disables USB-JTAG. The ESP-IDF USB-Serial-JTAG console page lists D- as GPIO24/26 and D+ as GPIO25/27; GPIO26/27 (USB1P1_N1/P1) are the second full-speed USB PHY (USB 2.0 Full-Speed OTG / alternate USB-Serial-JTAG routing) and are 'Priority 2' (free) in the datasheet by default. USB 2.0 HS OTG uses dedicated USB_DM/USB_DP pins, not GPIOs."},
+  "jtag": [2, 3, 4, 5],
+  "uart0_default": {"tx": 37, "rx": 38},
+  "adc1": {"16": 0, "17": 1, "18": 2, "19": 3, "20": 4, "21": 5, "22": 6, "23": 7},
+  "adc2": {"49": 0, "50": 1, "51": 2, "52": 3, "53": 4, "54": 5},
+  "adc2_wifi_conflict": null,
+  "has_wifi": false,
+  "has_bt_classic": false,
+  "has_ble": false,
+  "notes": [
+    "No radio: ESP32-P4 datasheet v0.7 feature list contains no Wi-Fi or Bluetooth (the only occurrence is the trademark footer), and the ESP-IDF stable esp_wifi API page for esp32p4 returns 'page not found ... the current chip ... does not support the feature'. Wireless requires an external companion chip.",
+    "flash_spi is empty: the datasheet pin overview puts flash on dedicated non-GPIO pins (FLASH_CS, FLASH_Q, FLASH_WP, FLASH_HOLD, FLASH_CK, FLASH_D on chip pins 27-33, powered by VDD_FLASHIO). The ESP-IDF GPIO summary lists no SPI0/1 GPIOs for P4.",
+    "adc2_wifi_conflict is null: P4 has ADC2 (GPIO49-GPIO54, CH0-CH5) but no Wi-Fi; ESP-IDF stable ADC oneshot hardware limitations for P4 contain only the RNG and oneshot/continuous exclusivity notes.",
+    "jtag pins: GPIO2 = MTCK, GPIO3 = MTDI, GPIO4 = MTMS, GPIO5 = MTDO (ESP-IDF configure-other-jtag page and datasheet IO MUX; note ordering differs from other chips). JTAG defaults to USB_SERIAL_JTAG; burning DIS_USB_JTAG moves it to GPIO2-GPIO5. GPIO2-GPIO5 are also touch pads TOUCH0-TOUCH3.",
+    "Strapping: ESP-IDF and datasheet agree on GPIO34-GPIO38. GPIO37/GPIO38 are both strapping pins and UART0 TX/RX.",
+    "input_only / no_internal_pull are empty: ESP-IDF GPIO summary lists none for this chip (the 'input-only GPIOs 34-39' remarks on the page refer to the original ESP32 and do NOT apply to P4 GPIO34-39); TRM v1.2 Register 10.43 IO_MUX_GPIOn_REG (n: 0-54) provides FUN_WPU/FUN_WPD for every GPIO. The GPIO34 'no internal pull resistors' sentence refers to its strapping/reset state.",
+    "Analog: GPIO2-GPIO15 are touch channels TOUCH0-TOUCH13 (also LP_GPIO2-15); GPIO0-GPIO15 are LP GPIOs. GPIO51/52 are ANA_CMPR_CH0 ref / non-inverting input, GPIO53/54 are ANA_CMPR_CH1 ref / non-inverting input.",
+    "VDDO_FLASH defaults to 3.3 V; burning EFUSE_0PXA_TIEH_SEL_0 switches it to 1.8 V (irreversible).",
+    "P4 datasheet used is 'Pre-release v0.7' for chip revision v3.x (ESP32-P4NRW16X / NRW32X). Earlier chip revisions (v1.x) may differ; differences are in the 'ESP32-P4 Chip Revision v3.x User Guide' (not consulted).",
+    "Data sourced from ESP-IDF stable = v6.1 docs, ESP32-P4 datasheet pre-release v0.7, ESP32-P4 TRM v1.2, retrieved 2026-10-28."
+  ],
+  "sources": [
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32p4/api-reference/peripherals/gpio.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32p4/api-reference/peripherals/adc/adc_oneshot.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32p4/api-guides/jtag-debugging/configure-other-jtag.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32p4/api-guides/usb-serial-jtag-console.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32p4/api-guides/tools/idf-monitor.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32p4/api-reference/network/esp_wifi.html",
+    "https://www.espressif.com/sites/default/files/documentation/esp32-p4_datasheet_en.pdf",
+    "https://www.espressif.com/sites/default/files/documentation/esp32-p4_technical_reference_manual_en.pdf"
+  ]
+}
