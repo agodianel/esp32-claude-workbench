@@ -1,0 +1,11 @@
+{
+  "name": "esp32-workbench",
+  "version": "0.2.0",
+  "description": "Multi-chip ESP32 firmware skills and MCP tools.",
+  "mcpServers": {
+    "esp32-workbench": {
+      "command": "python3",
+      "args": ["${extensionPath}/bin/esp32wb-mcp"]
+    }
+  }
+}

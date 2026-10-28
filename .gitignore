@@ -51,3 +51,9 @@ Reddit.md
 
 # Cache for local vector index
 .cache/
+
+# Missions
+mcp/missions
+
+# UV
+.uv/

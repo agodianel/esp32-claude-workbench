@@ -1,0 +1,5 @@
+interface:
+  display_name: "ESP32 Test Plan"
+  short_description: "Layered test plan: static, host, Unity on target, pytest-embedded"
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,5 @@
+interface:
+  display_name: "ESP32 Repo Scout"
+  short_description: "Map an ESP-IDF project: chip, components, pins, tasks, risks"
+policy:
+  allow_implicit_invocation: true

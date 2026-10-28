@@ -1,0 +1,140 @@
+{
+  "target": "esp32s2",
+  "name": "ESP32-S2",
+  "arch": "xtensa",
+  "toolchain_prefix": "xtensa-esp32s2-elf",
+  "gpios": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    26,
+    27,
+    28,
+    29,
+    30,
+    31,
+    32,
+    33,
+    34,
+    35,
+    36,
+    37,
+    38,
+    39,
+    40,
+    41,
+    42,
+    43,
+    44,
+    45,
+    46
+  ],
+  "input_only": [
+    46
+  ],
+  "no_internal_pull": [],
+  "strapping": {
+    "0": "Chip boot mode (with GPIO46). Default weak pull-up (1). GPIO0=1 -> SPI boot; GPIO0=0 and GPIO46=0 -> Joint Download Boot (USB-OTG / UART / SPI download).",
+    "45": "VDD_SPI (flash/PSRAM supply) voltage. Default weak pull-down (0) -> 3.3 V from VDD3P3_RTC via RSPI; 1 -> 1.8 V Flash Voltage Regulator. Ignored if eFuse EFUSE_VDD_SPI_FORCE=1 (then EFUSE_VDD_SPI_TIEH decides).",
+    "46": "Chip boot mode (must be 0 with GPIO0=0 for download boot) and ROM message printing control (with EFUSE_UART_PRINT_CONTROL). Default weak pull-down (0). Input-only pin."
+  },
+  "flash_spi": [
+    27,
+    28,
+    29,
+    30,
+    31,
+    32
+  ],
+  "psram": {
+    "pins": [
+      26
+    ],
+    "condition": "GPIO26 = SPICS1 = PSRAM CE# (in-package PSRAM on ESP32-S2R2 / ESP32-S2FN4R2, or recommended for off-package PSRAM). PSRAM also shares SPICLK/SPID/SPIQ/SPIWP/SPIHD (GPIO27,28,30,31,32) with flash. In 8-line (octal) SPI mode GPIO33-37 are additionally used (DQ4-DQ7, DQS/DM). ESP-IDF GPIO page: 'GPIO26-32 are usually used for SPI flash and PSRAM and not recommended for other uses.'"
+  },
+  "usb_jtag": {
+    "pins": [
+      19,
+      20
+    ],
+    "note": "USB OTG (full-speed) only: GPIO19 = USB_D-, GPIO20 = USB_D+ (internal PHY). Datasheet: 'by default, connected to the USB OTG. To function as GPIOs, these pins need to be reconfigured.' D-/D+ can be swapped via EFUSE_USB_EXCHG_PINS. The ESP32-S2 datasheet lists USB OTG but no USB-Serial-JTAG controller."
+  },
+  "jtag": [
+    39,
+    40,
+    41,
+    42
+  ],
+  "uart0_default": {
+    "tx": 43,
+    "rx": 44
+  },
+  "adc1": {
+    "1": 0,
+    "2": 1,
+    "3": 2,
+    "4": 3,
+    "5": 4,
+    "6": 5,
+    "7": 6,
+    "8": 7,
+    "9": 8,
+    "10": 9
+  },
+  "adc2": {
+    "11": 0,
+    "12": 1,
+    "13": 2,
+    "14": 3,
+    "15": 4,
+    "16": 5,
+    "17": 6,
+    "18": 7,
+    "19": 8,
+    "20": 9
+  },
+  "adc2_wifi_conflict": "ADC2 is also used by Wi-Fi. adc_oneshot_read() has provided protection between the Wi-Fi driver and ADC oneshot mode driver. [ADC oneshot page]  |  ADC2 is also used by Wi-Fi. adc_continuous_start() has provided the protection between Wi-Fi driver and ADC continuous mode driver. [ADC continuous page]",
+  "has_wifi": true,
+  "has_bt_classic": false,
+  "has_ble": false,
+  "notes": [
+    "JTAG mapping (datasheet IO MUX table): MTCK=GPIO39, MTDO=GPIO40, MTDI=GPIO41, MTMS=GPIO42.",
+    "Flash pin mapping (datasheet Table 2-14 + IO MUX): GPIO26=SPICS1 (PSRAM CE#), GPIO27=SPIHD, GPIO28=SPIWP, GPIO29=SPICS0 (flash CS#), GPIO30=SPICLK, GPIO31=SPIQ, GPIO32=SPID. flash_spi lists 27-32; GPIO26 is the PSRAM chip-select. ESP-IDF GPIO page treats all of GPIO26-32 as SPI0/1 not recommended for other uses, and datasheet assigns all of GPIO26-32 Priority 4 ('already allocated or not recommended').",
+    "GPIO33-37 are the upper data lines and DQS of SPI0/1 in 8-line SPI mode; usable as GPIO only if flash/PSRAM is not in 8-line mode (datasheet 2.3.6).",
+    "GPIO46 is input-only. ESP-IDF GPIO page: 'GPIO46 is fixed to pull-down and is input only.' It is NOT listed in no_internal_pull because it does have a (fixed) pull-down; software pull-up is not available on it. An audit should flag any attempt to enable a pull-up or output on GPIO46.",
+    "ESP32-S2 has no GPIO22-25.",
+    "ESP-IDF GPIO page notes: Strapping GPIO0, 45, 46; SPI0/1 GPIO26-32; JTAG GPIO39-42; GPI GPIO46. The GPIO page does not annotate UART0 or USB pins; those come from the datasheet.",
+    "Strapping hold time tH min 3 ms after CHIP_PU goes high (datasheet Table 3-2).",
+    "ADC continuous mode on ESP32-S2 uses SPI3 as DMA FIFO (adc_continuous page).",
+    "toolchain_prefix confirmed from ESP-IDF docs: xtensa-esp32s2-elf-gdb and xtensa-esp32s2-elf-addr2line. Installer package is xtensa-esp-elf."
+  ],
+  "sources": [
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/peripherals/gpio.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/peripherals/adc/adc_oneshot.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-reference/peripherals/adc/adc_continuous.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-guides/jtag-debugging/using-debugger.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-guides/fatal-errors.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-guides/tools/idf-monitor.html",
+    "https://www.espressif.com/sites/default/files/documentation/esp32-s2_datasheet_en.pdf (v1.9: Table 1-1, IO MUX table, Table 2-7, Sections 2.3.5/2.3.6, Table 2-14, Section 3 Boot Configurations)",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32s2/api-guides/tools/idf-tools.html"
+  ]
+}

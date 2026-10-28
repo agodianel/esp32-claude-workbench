@@ -1,0 +1,5 @@
+interface:
+  display_name: "ESP32 Peripheral Bring-up"
+  short_description: "Bring up I2C, SPI, UART, ADC and LEDC with chip-correct pins"
+policy:
+  allow_implicit_invocation: true

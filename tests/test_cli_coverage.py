@@ -6,9 +6,9 @@ from unittest.mock import patch
 
 import pytest
 
-from tools.analyze_sdkconfig import main as analyze_sdkconfig_main
-from tools.check_task_stacks import main as check_task_stacks_main
-from tools.scan_pins import main as scan_pins_main
+from esp32_workbench.pins import main as scan_pins_main
+from esp32_workbench.sdkconfig import main as analyze_sdkconfig_main
+from esp32_workbench.stacks import main as check_task_stacks_main
 
 
 def test_analyze_sdkconfig_main(tmp_path: Path, capsys: pytest.CaptureFixture):
@@ -35,10 +35,10 @@ def test_analyze_sdkconfig_main_no_args(capsys: pytest.CaptureFixture):
     with patch.object(sys, "argv", ["analyze-sdkconfig"]):
         with pytest.raises(SystemExit) as exc:
             analyze_sdkconfig_main()
-        assert exc.value.code == 1
+        assert exc.value.code == 2  # argparse usage error
 
-    out, _ = capsys.readouterr()
-    assert "Usage:" in out
+    _, err = capsys.readouterr()
+    assert "usage:" in err
 
 
 def test_check_task_stacks_main(tmp_path: Path, capsys: pytest.CaptureFixture):
@@ -63,10 +63,10 @@ def test_check_task_stacks_main_no_args(capsys: pytest.CaptureFixture):
     with patch.object(sys, "argv", ["check-stacks"]):
         with pytest.raises(SystemExit) as exc:
             check_task_stacks_main()
-        assert exc.value.code == 1
+        assert exc.value.code == 2  # argparse usage error
 
-    out, _ = capsys.readouterr()
-    assert "Usage:" in out
+    _, err = capsys.readouterr()
+    assert "usage:" in err
 
 
 def test_scan_pins_main(tmp_path: Path, capsys: pytest.CaptureFixture):
@@ -91,7 +91,7 @@ def test_scan_pins_main_no_args(capsys: pytest.CaptureFixture):
     with patch.object(sys, "argv", ["scan-pins"]):
         with pytest.raises(SystemExit) as exc:
             scan_pins_main()
-        assert exc.value.code == 1
+        assert exc.value.code == 2  # argparse usage error
 
-    out, _ = capsys.readouterr()
-    assert "Usage:" in out
+    _, err = capsys.readouterr()
+    assert "usage:" in err

@@ -1,0 +1,5 @@
+interface:
+  display_name: "ESP32 PR Prepare"
+  short_description: "PR description with test evidence, risks, rollback, mission links"
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,17 @@
+{
+  "name": "esp32-workbench",
+  "displayName": "ESP32 Workbench",
+  "version": "0.2.0",
+  "description": "Multi-chip ESP32 firmware skills (pin audit, crash decoding, build triage, release checks, contracts) with a zero-dependency MCP server and a GPIO guard hook.",
+  "author": { "name": "agodianel" },
+  "homepage": "https://github.com/agodianel/esp32-claude-workbench",
+  "repository": "https://github.com/agodianel/esp32-claude-workbench",
+  "license": "MIT",
+  "keywords": ["esp32", "esp-idf", "firmware", "embedded", "freertos"],
+  "mcpServers": {
+    "esp32-workbench": {
+      "command": "python3",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/bin/esp32wb-mcp"]
+    }
+  }
+}

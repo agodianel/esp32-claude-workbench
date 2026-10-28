@@ -1,0 +1,47 @@
+{
+  "target": "esp32c6",
+  "name": "ESP32-C6",
+  "arch": "riscv",
+  "toolchain_prefix": "riscv32-esp-elf",
+  "gpios": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30],
+  "input_only": [],
+  "no_internal_pull": [],
+  "strapping": {
+    "4": "MTMS: SDIO sampling/driving clock-edge strapping together with MTDI/GPIO5 (datasheet v1.5 Table 3-4). Default floating.",
+    "5": "MTDI: SDIO sampling/driving clock-edge strapping together with MTMS/GPIO4. Default floating.",
+    "8": "Chip boot mode (Joint Download Boot requires GPIO8=1 with GPIO9=0; any value for SPI Boot) and UART0 ROM message printing control with EFUSE_UART_PRINT_CONTROL. Default floating.",
+    "9": "Chip boot mode select: 1 = SPI Boot (default, internal weak pull-up), 0 = Joint Download Boot (USB-Serial-JTAG / UART / SDIO download). Holding GPIO9 low at reset enters download mode.",
+    "15": "JTAG signal source select, used with EFUSE_DIS_PAD_JTAG / EFUSE_DIS_USB_JTAG / EFUSE_JTAG_SEL_ENABLE (only consulted when JTAG_SEL_ENABLE is burned: 1 = USB Serial/JTAG, 0 = JTAG pins MTDI/MTCK/MTMS/MTDO). Default floating; datasheet: 'This pin does not have any internal pull resistors and the strapping value must be controlled by the external circuit that cannot be in a high impedance state.'"
+  },
+  "flash_spi": [24, 25, 26, 27, 28, 29, 30],
+  "psram": {"pins": [], "condition": "Not applicable: neither the ESP-IDF GPIO summary nor the ESP32-C6 datasheet v1.5 describes a PSRAM interface for this chip."},
+  "usb_jtag": {"pins": [12, 13], "note": "GPIO12 = USB_D-, GPIO13 = USB_D+. Used by USB-JTAG by default; reconfiguring them as normal GPIOs disables USB-JTAG. If the app reconfigures these pins the device disappears from the host; recover by pulling GPIO9 low and resetting."},
+  "jtag": [4, 5, 6, 7],
+  "uart0_default": {"tx": 16, "rx": 17},
+  "adc1": {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6},
+  "adc2": {},
+  "adc2_wifi_conflict": null,
+  "has_wifi": true,
+  "has_bt_classic": false,
+  "has_ble": true,
+  "notes": [
+    "flash_spi: ESP-IDF: 'GPIO24 ~ GPIO30 are usually used for SPI flash and not recommended for other uses.' Datasheet: GPIO24/25/26/28/29/30 are the SPI0/1 flash interface; GPIO27 is the VDD_SPI pin ('can only be reconfigured as a GPIO pin if the flash is powered by an external power supply').",
+    "Package variants (ESP-IDF): chips with SiP flash built in dedicate GPIO24-GPIO30 to the SiP flash and do not lead out GPIO10-GPIO11 (22 usable GPIOs). Chips without in-package flash do not lead out GPIO14. An auditor should know the exact part number to flag GPIO10/11/14.",
+    "input_only / no_internal_pull are empty: ESP-IDF GPIO summary lists none for this chip (the 'input-only GPIOs 34-39' remarks on the page are for the original ESP32); datasheet IO MUX types are I/O/T; TRM v1.2 Register 7.20 IO_MUX_GPIOn_REG (n: 0-30) provides FUN_WPU/FUN_WPD for every GPIO. The datasheet sentence that GPIO15 'does not have any internal pull resistors' describes its reset/strapping state, not a lack of firmware-controllable pulls.",
+    "jtag order is [MTMS, MTDI, MTCK, MTDO] = [GPIO4, GPIO5, GPIO6, GPIO7]. JTAG defaults to USB_SERIAL_JTAG; burning DIS_USB_JTAG moves it to GPIO4-GPIO7. GPIO4/GPIO5 are also strapping pins.",
+    "No ADC2: datasheet '12-bit SAR ADC, up to 7 channels'; ADC1 CH0-CH6 on GPIO0-GPIO6. ESP-IDF stable ADC oneshot hardware limitations for C6 contain only the RNG and oneshot/continuous exclusivity notes; no Wi-Fi restriction.",
+    "LP GPIOs: GPIO0-GPIO7 (LP_GPIO0-7), usable in deep sleep / by LP core. GPIO0/GPIO1 are also XTAL_32K_P/N.",
+    "Strapping timing: hold time tH min 3 ms after CHIP_PU high.",
+    "Radio: datasheet '2.4 GHz Wi-Fi 6 (802.11ax), Bluetooth 5 (LE), Zigbee and Thread (802.15.4)' - no Bluetooth Classic.",
+    "Data sourced from ESP-IDF stable = v6.1 docs, ESP32-C6 datasheet v1.5, ESP32-C6 TRM v1.2, retrieved 2026-10-28."
+  ],
+  "sources": [
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32c6/api-reference/peripherals/gpio.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32c6/api-reference/peripherals/adc/adc_oneshot.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32c6/api-guides/jtag-debugging/configure-other-jtag.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32c6/api-guides/usb-serial-jtag-console.html",
+    "https://docs.espressif.com/projects/esp-idf/en/stable/esp32c6/api-guides/tools/idf-monitor.html",
+    "https://www.espressif.com/sites/default/files/documentation/esp32-c6_datasheet_en.pdf",
+    "https://www.espressif.com/sites/default/files/documentation/esp32-c6_technical_reference_manual_en.pdf"
+  ]
+}

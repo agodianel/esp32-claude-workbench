@@ -1,0 +1,14 @@
+{
+  "name": "esp32-workbench",
+  "owner": {
+    "name": "agodianel"
+  },
+  "description": "Hardware-aware ESP32 / ESP-IDF firmware skills, MCP tools and hooks for Claude Code.",
+  "plugins": [
+    {
+      "name": "esp32-workbench",
+      "source": "./",
+      "description": "Multi-chip ESP32 firmware skills, MCP tools and a GPIO guard hook."
+    }
+  ]
+}

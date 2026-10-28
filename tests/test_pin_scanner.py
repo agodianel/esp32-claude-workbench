@@ -3,7 +3,7 @@
 import textwrap
 from pathlib import Path
 
-from tools.scan_pins import (
+from esp32_workbench.pins import (
     PinAssignment,
     analyze_pins,
     scan_file,

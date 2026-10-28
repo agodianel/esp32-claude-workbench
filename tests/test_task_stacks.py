@@ -3,7 +3,7 @@
 import textwrap
 from pathlib import Path
 
-from tools.check_task_stacks import (
+from esp32_workbench.stacks import (
     TaskInfo,
     analyze_tasks,
     scan_file,

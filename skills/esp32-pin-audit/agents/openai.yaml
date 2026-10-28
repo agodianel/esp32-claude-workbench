@@ -1,0 +1,5 @@
+interface:
+  display_name: "ESP32 Pin Audit"
+  short_description: "Check GPIO use against the real chip's flash, strapping, ADC2, USB pins"
+policy:
+  allow_implicit_invocation: true

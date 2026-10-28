@@ -1,0 +1,5 @@
+interface:
+  display_name: "ESP32 Crash Review"
+  short_description: "Decode Guru Meditation panics on Xtensa and RISC-V ESP32 chips"
+policy:
+  allow_implicit_invocation: true

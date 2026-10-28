@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "esp32-workbench": {
+      "command": "python3",
+      "args": ["${PLUGIN_ROOT}/bin/esp32wb-mcp"]
+    }
+  }
+}
